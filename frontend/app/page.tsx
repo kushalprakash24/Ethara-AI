@@ -41,7 +41,7 @@ export default function Dashboard() {
 
   const fetchMetrics = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/dashboard/metrics");
+  const res = await fetch("https://ethara-ai-1.onrender.com/dashboard/metrics");
       const data = await res.json();
       setMetrics(data.summary);
     } catch (err) { console.error(err); }
@@ -49,7 +49,7 @@ export default function Dashboard() {
 
   const fetchProjectsSummary = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/projects/summary");
+  const res = await fetch("https://ethara-ai-1.onrender.com/projects/summary");
       const data = await res.json();
       setProjectsList(data);
     } catch (err) { console.error(err); }
@@ -57,7 +57,7 @@ export default function Dashboard() {
 
   const fetchFloorPlan = async (floorNum) => {
     try {
-      const res = await fetch(`http://127.0.0.1:8000/seats/floor-plan/${floorNum}`);
+  const res = await fetch(`https://ethara-ai-1.onrender.com/seats/floor-plan/${floorNum}`);
       const data = await res.json();
       // Limiting display items locally to 60 for clean, instant UI rendering
       setFloorSeats(data.slice(0, 60)); 
@@ -67,7 +67,7 @@ export default function Dashboard() {
   const fetchDirectory = async (query) => {
     setLoading(true);
     try {
-      const res = await fetch(`http://127.0.0.1:8000/dashboard/search?q=${query}&limit=8`);
+  const res = await fetch(`https://ethara-ai-1.onrender.com/dashboard/search?q=${query}&limit=8`);
       const data = await res.json();
       setSearchResults(data.results);
       setTotalMatches(data.total_matches);
@@ -81,7 +81,7 @@ export default function Dashboard() {
     setAiLoading(true);
     setAiResponse(null);
     try {
-      const res = await fetch(`http://127.0.0.1:8000/ai/ask?q=${encodeURIComponent(aiPrompt)}`);
+  const res = await fetch(`https://ethara-ai-1.onrender.com/ai/ask?q=${encodeURIComponent(aiPrompt)}`);
       const data = await res.json();
       setAiResponse(data);
     } catch (err) { console.error(err); }
@@ -92,7 +92,7 @@ export default function Dashboard() {
     e.preventDefault();
     setActionMessage({ type: "info", text: "Processing allocation parameters..." });
     try {
-      const url = `http://127.0.0.1:8000/seats/auto-allocate-joiner?name=${encodeURIComponent(formData.name)}&email=${encodeURIComponent(formData.email)}&role=${formData.role}&project_id=00000000-0000-0000-0000-000000000000`;
+      const url = `https://ethara-ai-1.onrender.com/seats/auto-allocate-joiner?name=${encodeURIComponent(formData.name)}&email=${encodeURIComponent(formData.email)}&role=${formData.role}&project_id=00000000-0000-0000-0000-000000000000`;
       const res = await fetch(url, { method: "POST" });
       const data = await res.json();
 
@@ -109,7 +109,7 @@ export default function Dashboard() {
   const handleReleaseSeat = async (seatNumber) => {
     if (!confirm(`Are you sure you want to release desk ${seatNumber}?`)) return;
     try {
-      const res = await fetch(`http://127.0.0.1:8000/seats/release-by-code/${seatNumber}`, { method: "DELETE" });
+      const res = await fetch(`https://ethara-ai-1.onrender.com/seats/release-by-code/${seatNumber}`, { method: "DELETE" });
       if (res.ok) {
         refreshAllData();
         fetchProjectsSummary();

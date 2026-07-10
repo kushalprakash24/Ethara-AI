@@ -29,3 +29,25 @@ app.include_router(projects.router)
 @app.get("/")
 def health_check():
     return {"status": "healthy"}
+
+from sqlalchemy.orm import Session
+from fastapi import Depends
+from .database import SessionLocal  # Jo bhi aapka session creator ho
+# Apne Faker waale script ya models ko import karein
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+       db.close()
+
+@app.get("/seed-data")
+def seed_database(db: Session = Depends(get_db)):
+    # 💡 Yahan apna wahi Faker waala logic likhein jo aapne data generate karne ke liye likha tha
+    # Example:
+    # for _ in range(10):
+    #     user = User(name=fake.name(), email=fake.email())
+    #     db.add(user)
+    # db.commit()
+    return {"message": "Database seeded successfully with Faker data!"}
