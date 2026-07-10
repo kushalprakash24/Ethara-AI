@@ -72,3 +72,18 @@ app.include_router(projects.router)
 @app.get("/")
 def health_check():
     return {"status": "healthy"}
+
+from app.database import SessionLocal
+# Agar aapki seed file me koi main function hai to use import karein, 
+# ya fir direct seed.py wale logic ko yahan call kar sakte hain.
+# Agar seed.py direct run hoti hai, to hum use terminal command ki tarah backend se execute karwa dete hain:
+import subprocess
+
+@app.get("/run-my-seed-data-123")
+def run_seed_script():
+    try:
+        # Ye command wahi kaam karegi jo hum shell me karne wale the
+        result = subprocess.run(["python", "seed.py"], capture_output=True, text=True, check=True)
+        return {"status": "success", "output": result.stdout}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
