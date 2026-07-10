@@ -14,6 +14,7 @@ app = FastAPI(
 # 🌐 CORS Middleware - Frontend (React/Next.js) ko backend se connect karne ke liye
 app.add_middleware(
     CORSMiddleware,
+    allow_origins=["*"],
     allow_origins=[
         "http://localhost:3000",
         "http://127.0.0.1:3000",
