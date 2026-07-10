@@ -41,7 +41,7 @@ export default function Dashboard() {
 
   const fetchMetrics = async () => {
     try {
-  const res = await fetch("https://ethara-ai-1.onrender.com/dashboard/metrics");
+  const res = await fetch("https://ethara-ai-1-ijpl.onrender.com/dashboard/metrics");
       const data = await res.json();
       setMetrics(data.summary);
     } catch (err) { console.error(err); }
@@ -49,25 +49,29 @@ export default function Dashboard() {
 
   const fetchProjectsSummary = async () => {
     try {
-  const res = await fetch("https://ethara-ai-1.onrender.com/projects/summary");
+  const res = await fetch("https://ethara-ai-1-ijpl.onrender.com/projects/summary");
       const data = await res.json();
       setProjectsList(data);
     } catch (err) { console.error(err); }
   };
 
-  const fetchFloorPlan = async (floorNum) => {
+  const fetchFloorPlan = async (floorNum: number) => {
     try {
-  const res = await fetch(`https://ethara-ai-1.onrender.com/seats/floor-plan/${floorNum}`);
+      const res = await fetch(
+        `https://ethara-ai-1-ijpl.onrender.com/seats/floor-plan/${floorNum}`
+      );
+
       const data = await res.json();
-      // Limiting display items locally to 60 for clean, instant UI rendering
-      setFloorSeats(data.slice(0, 60)); 
-    } catch (err) { console.error(err); }
+      setFloorSeats(data.slice(0, 60));
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const fetchDirectory = async (query) => {
+  const fetchDirectory = async (query: string) => {
     setLoading(true);
     try {
-  const res = await fetch(`https://ethara-ai-1.onrender.com/dashboard/search?q=${query}&limit=8`);
+      const res = await fetch(`https://ethara-ai-1-ijpl.onrender.com/dashboard/search?q=${query}&limit=8`);
       const data = await res.json();
       setSearchResults(data.results);
       setTotalMatches(data.total_matches);
@@ -75,24 +79,35 @@ export default function Dashboard() {
     finally { setLoading(false); }
   };
 
-  const handleAiSubmit = async (e) => {
-    e.preventDefault();
-    if (!aiPrompt) return;
-    setAiLoading(true);
-    setAiResponse(null);
-    try {
-  const res = await fetch(`https://ethara-ai-1.onrender.com/ai/ask?q=${encodeURIComponent(aiPrompt)}`);
-      const data = await res.json();
-      setAiResponse(data);
-    } catch (err) { console.error(err); }
-    finally { setAiLoading(false); }
-  };
+const handleAiSubmit = async (
+  e: React.FormEvent<HTMLFormElement>
+) => {
+  e.preventDefault();
+
+  if (!aiPrompt) return;
+
+  setAiLoading(true);
+  setAiResponse(null);
+
+  try {
+    const res = await fetch(
+      `https://ethara-ai-1-ijpl.onrender.com/ai/ask?q=${encodeURIComponent(aiPrompt)}`
+    );
+
+    const data = await res.json();
+    setAiResponse(data);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setAiLoading(false);
+  }
+};
 
   const handleOnboardSubmit = async (e) => {
     e.preventDefault();
     setActionMessage({ type: "info", text: "Processing allocation parameters..." });
     try {
-      const url = `https://ethara-ai-1.onrender.com/seats/auto-allocate-joiner?name=${encodeURIComponent(formData.name)}&email=${encodeURIComponent(formData.email)}&role=${formData.role}&project_id=00000000-0000-0000-0000-000000000000`;
+      const url = `https://ethara-ai-1-ijpl.onrender.com/seats/auto-allocate-joiner?name=${encodeURIComponent(formData.name)}&email=${encodeURIComponent(formData.email)}&role=${formData.role}&project_id=00000000-0000-0000-0000-000000000000`;
       const res = await fetch(url, { method: "POST" });
       const data = await res.json();
 
@@ -109,7 +124,7 @@ export default function Dashboard() {
   const handleReleaseSeat = async (seatNumber) => {
     if (!confirm(`Are you sure you want to release desk ${seatNumber}?`)) return;
     try {
-      const res = await fetch(`https://ethara-ai-1.onrender.com/seats/release-by-code/${seatNumber}`, { method: "DELETE" });
+      const res = await fetch(`https://ethara-ai-1-ijpl.onrender.com/seats/release-by-code/${seatNumber}`, { method: "DELETE" });
       if (res.ok) {
         refreshAllData();
         fetchProjectsSummary();
