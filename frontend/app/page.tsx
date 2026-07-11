@@ -13,7 +13,6 @@ export default function Dashboard() {
   const [selectedFloor, setSelectedFloor] = useState(1);
   const [floorSeats, setFloorSeats] = useState([]);
   const [projectsList, setProjectsList] = useState([]);
-
   // Form & AI States
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ name: "", email: "", role: "employee" });
@@ -142,6 +141,13 @@ const handleAiSubmit = async (
           <button onClick={() => setCurrentView("center")} className={`w-full text-left flex items-center px-4 py-3 rounded-lg font-medium transition ${currentView === "center" ? "bg-slate-800 text-white" : "text-slate-400 hover:bg-slate-800 hover:text-white"}`}>🏢 Command Center</button>
           <button onClick={() => setCurrentView("maps")} className={`w-full text-left flex items-center px-4 py-3 rounded-lg font-medium transition ${currentView === "maps" ? "bg-slate-800 text-white" : "text-slate-400 hover:bg-slate-800 hover:text-white"}`}>🪑 Floor Plan Maps</button>
           <button onClick={() => setCurrentView("projects")} className={`w-full text-left flex items-center px-4 py-3 rounded-lg font-medium transition ${currentView === "projects" ? "bg-slate-800 text-white" : "text-slate-400 hover:bg-slate-800 hover:text-white"}`}>📁 Projects Ledger</button>
+          {/* 🔗 NEW NAVIGATION LINK: PROJECT MAPPING HUB */}
+          <button 
+            onClick={() => setCurrentView("project-mapping")} 
+            className={`w-full text-left flex items-center px-4 py-3 rounded-lg font-medium transition ${currentView === "project-mapping" ? "bg-slate-800 text-white" : "text-slate-400 hover:bg-slate-800 hover:text-white"}`}
+          >
+            ⚙️ Project Mapping Hub
+          </button>
           <div className="pt-4"><button onClick={() => setShowForm(true)} className="w-full text-left flex items-center px-4 py-3 text-emerald-400 bg-emerald-950/40 hover:bg-emerald-900/30 rounded-lg transition border border-emerald-900/50 font-bold">➕ Allocate New Joiner</button></div>
         </nav>
       </aside>
@@ -447,6 +453,108 @@ const handleAiSubmit = async (
           </div>
         </div>
       )}
+
+      {/* VIEW 4: ADMINISTRATIVE PROJECT & SEAT MAPPING HUB */}
+        {currentView === "project-mapping" && (
+          <>
+            <header className="mb-8">
+              <h1 className="text-3xl font-bold tracking-tight text-slate-900">Project Seating Mapping Hub</h1>
+              <p className="text-sm text-slate-500">Admin & HR command control panel to bind personnel profiles to structural corporate assets.</p>
+            </header>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* LEFT COLUMN: THE DISPATCH ALLOCATION FORM */}
+              <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+                <div className="border-b border-slate-100 pb-4 mb-6">
+                  <h3 className="text-md font-bold text-slate-800">Deploy Enterprise Allocation</h3>
+                  <p className="text-xs text-slate-400">Executing this action updates relational bindings in PostgreSQL and swaps target workspace markers instantly.</p>
+                </div>
+
+                <form 
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    const empId = e.target.elements.empId.value.trim();
+                    const projId = e.target.elements.projId.value.trim();
+                    const seatId = e.target.elements.seatId.value.trim();
+
+                    if (!empId || !projId || !seatId) {
+                      alert("❌ Please fill out all structural UUID fields.");
+                      return;
+                    }
+
+                    try {
+                      const res = await fetch("http://127.0.0.1:8000/seats/manual-allocate", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          employee_id: empId,
+                          seat_id: seatId,
+                          project_id: projId
+                        }),
+                      });
+                      
+                      const data = await res.json();
+                      if (res.ok) {
+                        alert(`🎉 Assignment Matrix Successful: ${data.message}`);
+                        e.target.reset();
+                        refreshAllData(); // Syncs metrics cards and lists globally
+                        fetchProjectsSummary();
+                      } else {
+                        alert(`❌ System Refusal: ${data.detail || "Validation Error."}`);
+                      }
+                    } catch (err) {
+                      alert("❌ Failed to reach backend engine.");
+                    }
+                  }}
+                  className="space-y-5"
+                >
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-slate-400 mb-1.5">Target Employee ID (UUID)</label>
+                    <input name="empId" required type="text" placeholder="e.g. 550e8400-e29b-41d4-a716-446655440000" className="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-slate-50 text-sm outline-none focus:ring-2 focus:ring-indigo-500 font-mono" />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-slate-400 mb-1.5">Target Corporate Project Account (UUID)</label>
+                    <input name="projId" required type="text" placeholder="e.g. 33a2b411-c91b-48d4-b711-112233445566" className="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-slate-50 text-sm outline-none focus:ring-2 focus:ring-indigo-500 font-mono" />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-slate-400 mb-1.5">Target Building Seat ID (UUID)</label>
+                    <input name="seatId" required type="text" placeholder="e.g. 99b1a2c3-d4e5-4f6a-7b8c-9d0e1f2a3b4c" className="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-slate-50 text-sm outline-none focus:ring-2 focus:ring-indigo-500 font-mono" />
+                  </div>
+
+                  <div className="pt-2">
+                    <button type="submit" className="w-full py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white text-sm font-bold rounded-xl shadow-md transition-all">
+                      Lock Relational Mapping Parameters
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* RIGHT COLUMN: ADMINISTRATIVE HELPER INFO PANEL */}
+              <div className="space-y-6">
+                <div className="bg-gradient-to-br from-slate-900 to-indigo-950 text-white p-5 rounded-2xl shadow-sm border border-slate-800">
+                  <h4 className="text-sm font-bold text-indigo-300 mb-2">⚙️ Architecture Notes</h4>
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    This manager portal leverages atomic transactions inside your database layer. If an employee already possesses a desk assignment elsewhere in the facility, the database engine will <b>automatically vacate their prior desk</b> before capturing the new deployment coordinate.
+                  </p>
+                </div>
+
+                <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+                  <h4 className="text-sm font-bold text-slate-800 mb-3">📍 Active Project Quick Reference</h4>
+                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                    {projectsList.map((p) => (
+                      <div key={p.project_id} className="p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-[11px]">
+                        <p className="font-bold text-slate-700 truncate">{p.project_name}</p>
+                        <p className="text-slate-400 font-mono mt-0.5 select-all truncate">{p.project_id}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
 
     </div>
   );
