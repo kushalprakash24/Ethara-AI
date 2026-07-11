@@ -91,19 +91,25 @@ export default function Dashboard() {
       
       setAiResponse(data);
 
-      // 💡 FIX HERE: Agar backend se employee locate ka data aaya hai, toh use directory table me override kar do
+      // Filter table list when an employee is located or project list is fetched
       if (data.intent === "locate_employee" && data.data) {
-        setSearchResults(data.data); // Aapki table jiss state se map ho rahi hai (e.g., setSearchResults ya setEmployees), wahan ye data set kar do!
+        setSearchResults(data.data);
+      }
+      
+      // Automatically reset directory table if user clears prompt / asks to reset
+      if (data.trigger_reset) {
+        // Re-trigger your initial master directory fetch function here
+        if (typeof fetchDirectory === "function") fetchDirectory(""); 
       }
 
-      // Floor redirect script (agar pehle se add ki ho)
+      // Auto layout map redirection rule
       if (data.action_required === "redirect_to_map" && data.parameters?.floor) {
         if (typeof fetchFloorPlan === "function") {
           fetchFloorPlan(data.parameters.floor);
         }
       }
     } catch (err) {
-      console.error("AI Assistant Error:", err);
+      console.error("AI Assistant Integration Error:", err);
     } finally {
       setAiLoading(false);
     }
