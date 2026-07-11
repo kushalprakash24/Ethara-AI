@@ -181,7 +181,7 @@ export default function Dashboard() {
               <form onSubmit={handleAiSubmit} className="flex gap-3 mb-4">
                 <input 
                   type="text" 
-                  placeholder="e.g., 'Where does Andre Moore sit?' or 'Show utilization report'..." 
+                  placeholder="Try: 'Kitni seat available h?' or 'Kis project pr kitne employee h?'..." 
                   value={aiPrompt} 
                   onChange={(e) => setAiPrompt(e.target.value)} 
                   className="flex-1 px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm text-white" 
@@ -191,16 +191,17 @@ export default function Dashboard() {
               
               {(aiLoading || aiResponse) && (
                 <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700 text-sm font-mono transition-all">
-                  {aiLoading && <p className="text-slate-400 animate-pulse">Processing your query against the active registry...</p>}
+                  {aiLoading && <p className="text-slate-400 animate-pulse">Running live query optimization...</p>}
                   
                   {aiResponse && (
                     <div className="space-y-2">
                       <p className="text-indigo-400 text-xs">💡 Intent Recognized: <span className="text-slate-300 font-sans italic">{aiResponse.interpreted_query}</span></p>
                       <hr className="border-slate-700/50 my-1"/>
-                      {/* 🚀 Main message driven directly from backend logic */}
-                      <p className="text-white text-sm font-sans whitespace-pre-line bg-slate-900/40 p-2.5 rounded-lg border border-slate-800/60">
+                      
+                      {/* Main system output container */}
+                      <div className="text-white text-sm font-sans whitespace-pre-line bg-slate-900/50 p-3 rounded-lg border border-slate-800">
                         {aiResponse.message}
-                      </p>
+                      </div>
                     </div>
                   )}
                 </div>
