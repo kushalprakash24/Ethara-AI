@@ -78,29 +78,36 @@ export default function Dashboard() {
     finally { setLoading(false); }
   };
 
-const handleAiSubmit = async (
-  e: React.FormEvent<HTMLFormElement>
-) => {
-  e.preventDefault();
+  const handleAiSubmit = async (e: any) => {
+    e.preventDefault();
+    if (!aiPrompt.trim()) return;
 
-  if (!aiPrompt) return;
+    setAiLoading(true);
+    setAiResponse(null);
 
-  setAiLoading(true);
-  setAiResponse(null);
+    try {
+      const res = await fetch(`https://ethara-ai-1-ijpl.onrender.com/ai/ask?q=${encodeURIComponent(aiPrompt)}`);
+      const data = await res.json();
+      
+      setAiResponse(data);
 
-  try {
-    const res = await fetch(
-      `https://ethara-ai-1-ijpl.onrender.com/ai/ask?q=${encodeURIComponent(aiPrompt)}`
-    );
+      // 💡 FIX HERE: Agar backend se employee locate ka data aaya hai, toh use directory table me override kar do
+      if (data.intent === "locate_employee" && data.data) {
+        setSearchResults(data.data); // Aapki table jiss state se map ho rahi hai (e.g., setSearchResults ya setEmployees), wahan ye data set kar do!
+      }
 
-    const data = await res.json();
-    setAiResponse(data);
-  } catch (err) {
-    console.error(err);
-  } finally {
-    setAiLoading(false);
-  }
-};
+      // Floor redirect script (agar pehle se add ki ho)
+      if (data.action_required === "redirect_to_map" && data.parameters?.floor) {
+        if (typeof fetchFloorPlan === "function") {
+          fetchFloorPlan(data.parameters.floor);
+        }
+      }
+    } catch (err) {
+      console.error("AI Assistant Error:", err);
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleOnboardSubmit = async (e) => {
     e.preventDefault();
