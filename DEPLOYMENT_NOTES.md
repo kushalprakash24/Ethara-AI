@@ -23,7 +23,7 @@ This document provides blueprints and structural guidelines for deploying the Et
 1. Clone the master repository branch onto your target linux/unix virtual private instance.
 2. Configure system environment production files (`.env`):
    ```env
-   DATABASE_URL=postgresql://user:secure_password@host:port/database_name
+   DATABASE_URL=postgresql://postgres:kushal123@localhost:5432/seat_allocator
    ENV_MODE=production
    CORS_ORIGINS=["["http://localhost:3000", "[http://127.0.0.1:3000](http://192.168.1.7:3000)"]]
 
@@ -31,8 +31,8 @@ Set up Gunicorn wrapping multiple asynchronous Uvicorn workers for process monit
 
 gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
 
-<!-- Frontend Client Infrastructure Deployment:  
-NEXT_PUBLIC_API_URL=[https://myname.com](https://myname.com)  -->
+Frontend Client Infrastructure Deployment:  
+https://ethara-ai-cnjn.vercel.app/
 
 Build the optimal production payload distribution directory:
 

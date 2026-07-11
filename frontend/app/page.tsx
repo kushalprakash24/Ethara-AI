@@ -179,13 +179,30 @@ export default function Dashboard() {
             <section className="bg-gradient-to-r from-slate-900 to-indigo-950 text-white rounded-2xl p-6 shadow-md mb-8">
               <h2 className="text-lg font-bold text-indigo-300 mb-4">🤖 Command AI Assistant</h2>
               <form onSubmit={handleAiSubmit} className="flex gap-3 mb-4">
-                <input type="text" placeholder="e.g., 'Where does John sit?'..." value={aiPrompt} onChange={(e) => setAiPrompt(e.target.value)} className="flex-1 px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm text-white" />
+                <input 
+                  type="text" 
+                  placeholder="e.g., 'Where does Andre Moore sit?' or 'Show utilization report'..." 
+                  value={aiPrompt} 
+                  onChange={(e) => setAiPrompt(e.target.value)} 
+                  className="flex-1 px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm text-white" 
+                />
                 <button type="submit" className="px-6 py-2.5 bg-indigo-500 text-white font-semibold rounded-xl text-sm">Ask AI</button>
               </form>
+              
               {(aiLoading || aiResponse) && (
-                <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700 text-sm font-mono">
-                  {aiLoading && <p className="text-slate-400 animate-pulse">Running query...</p>}
-                  {aiResponse && <p className="text-indigo-300">💡 Intent Recognized: <span className="text-white font-sans">{aiResponse.interpreted_query}</span></p>}
+                <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700 text-sm font-mono transition-all">
+                  {aiLoading && <p className="text-slate-400 animate-pulse">Processing your query against the active registry...</p>}
+                  
+                  {aiResponse && (
+                    <div className="space-y-2">
+                      <p className="text-indigo-400 text-xs">💡 Intent Recognized: <span className="text-slate-300 font-sans italic">{aiResponse.interpreted_query}</span></p>
+                      <hr className="border-slate-700/50 my-1"/>
+                      {/* 🚀 Main message driven directly from backend logic */}
+                      <p className="text-white text-sm font-sans whitespace-pre-line bg-slate-900/40 p-2.5 rounded-lg border border-slate-800/60">
+                        {aiResponse.message}
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </section>
