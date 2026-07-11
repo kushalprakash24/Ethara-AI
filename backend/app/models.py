@@ -30,7 +30,7 @@ class Floor(Base):
     __tablename__ = "floors"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    floor_number = Column(Integer, nullable=False)
+    floor_number = Column(Integer, nullable=False, index=True)  
     block_name = Column(String, nullable=False)
 
     seats = relationship("Seat", back_populates="floor", cascade="all, delete-orphan")
@@ -40,9 +40,8 @@ class Seat(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     seat_number = Column(String, nullable=False, unique=True)
-    floor_id = Column(UUID(as_uuid=True), ForeignKey("floors.id"), nullable=False)
-    status = Column(String, default="vacant")  # vacant, occupied, reserved
-
+    floor_id = Column(UUID(as_uuid=True), ForeignKey("floors.id"), nullable=False, index=True)  
+    status = Column(String, default="vacant", index=True) 
     # Relationships
     floor = relationship("Floor", back_populates="seats")
     allocation = relationship("SeatAllocation", uselist=False, back_populates="seat")
@@ -52,7 +51,7 @@ class SeatAllocation(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     employee_id = Column(UUID(as_uuid=True), ForeignKey("employees.id"), unique=True, nullable=False)
-    seat_id = Column(UUID(as_uuid=True), ForeignKey("seats.id"), unique=True, nullable=False)
+    seat_id = Column(UUID(as_uuid=True), ForeignKey("seats.id"), unique=True, nullable=False, index=True)  
     project_id = Column(UUID(as_uuid=True), ForeignKey("projects.id"), nullable=False)
     allocated_at = Column(DateTime(timezone=True), server_default=func.now())
 
