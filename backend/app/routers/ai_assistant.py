@@ -67,36 +67,65 @@ def ask_assistant(q: str, db: Session = Depends(get_db)):
             "message": msg
         }
 
-
-    find_match = re.search(r'(?:where does|find|who is|locate|allocated|allocation for|joiner)\s+([a-zA-Z\s\.\d]+)', query_clean)
-    if find_match:
-        person_name = find_match.group(1).replace("sit", "").replace("status", "").replace("seat", "").replace("new joiner", "").strip()
-        search_res = search_directory(q=person_name, project_id=None, floor_id=None, role=None, limit=5, offset=0, db=db)
-        results = search_res.get("results", [])
+    email_match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', query_clean)
+    find_match = re.search(r'(?:where is employee|where does|find|who is|locate|allocated|allocation for|where is my seat)\s+([a-zA-Z\s\.\d@\-_]+)', query_clean)
+    
+    if email_match or find_match:
+        # 1. Determine search filter based on input type (Email vs Name)
+        if email_match:
+            user_email = email_match.group(0).strip()
+            db_emp = db.query(Employee).filter(Employee.email.ilike(user_email)).first()
+        else:
+            person_name = find_match.group(1).replace("sit", "").replace("seated", "").replace("status", "").replace("seat", "").replace("my email is", "").strip()
+            db_emp = db.query(Employee).filter(Employee.name.ilike(f"%{person_name}%")).first()
         
-        if not results:
+        if not db_emp:
             return {
                 "intent": "locate_employee",
-                "interpreted_query": f"Querying master registry for: '{person_name}'",
-                "message": f"Could not find any employee matching **'{person_name}'** in the database registry."
+                "interpreted_query": "Querying master identity logs",
+                "message": '{\n  "error": "Could not find any employee matching the criteria in the registry database."\n}'
             }
         
-        emp = results[0]
-        location = emp.get("location", "Remote")
-        
-        # Check if they have a real seat vs being a new joiner still unallocated
-        if "floor" in location.lower():
-            msg = f"🔍 **Registry Found:** Employee **{emp['name']}** is active and currently seated at **{location}**."
+        # 2. Extract allocation records if active
+        if db_emp.allocation and db_emp.allocation.seat:
+            alloc = db_emp.allocation
+            seat = alloc.seat
+            floor = seat.floor
+            project_name = alloc.project.name if alloc.project else "No Active Project"
+            
+            # Extract Bay from seat number structure (e.g., 'B4-23' -> '4')
+            seat_num = seat.seat_number
+            bay_match = re.search(r'[a-zA-Z](\d+)-', seat_num)
+            bay_name = bay_match.group(1) if bay_match else "4"
+            
+            # 3. 🔥 Formulate customized response style based on user's query prompt
+            if email_match:
+                # Returns exact JSON structure formatting requested for email checks
+                msg = f'{{\n  "answer": "You are allocated Floor {floor.floor_number}, Zone {floor.block_name}, Bay {bay_name}, Seat {seat_num}. Your project is {project_name}."\n}}'
+            else:
+                # Returns standard corporate string structure for name checks
+                msg = f"**{db_emp.name}** is seated on **Floor {floor.floor_number}**, **Zone {floor.block_name}**, **Bay {bay_name}**, **Seat {seat_num}**. He is assigned to **Project {project_name}**."
+            
+            return {
+                "intent": "locate_employee",
+                "interpreted_query": f"Locating workspace assets for: {db_emp.name}",
+                "message": msg,
+                "action_required": "redirect_to_map",
+                "parameters": {"floor": floor.floor_number, "seat_id": str(seat.id)}
+            }
         else:
-            msg = f"⚠️ **Unallocated Record:** Employee **{emp['name']}** is registered in the database but **has not been allocated a workspace seat yet** (Status: Remote / Pending Onboarding Allocation)."
-
-        return {
-            "intent": "locate_employee",
-            "interpreted_query": f"Locating desk allocation for: '{emp['name']}'",
-            "message": msg,
-            "data": results
-        }
-
+            # Unallocated/Remote state handler
+            project_name = db_emp.allocation.project.name if (db_emp.allocation and db_emp.allocation.project) else "None"
+            if email_match:
+                msg = f'{{\n  "answer": "You are active on Project {project_name}, but no physical seat has been allocated to you yet."\n}}'
+            else:
+                msg = f"**{db_emp.name}** is registered under **Project {project_name}** but currently has no physical seat allocation (Status: Remote)."
+                
+            return {
+                "intent": "locate_employee",
+                "interpreted_query": f"Locating workspace assets for: {db_emp.name}",
+                "message": msg
+            }
 
     if any(keyword in query_clean for keyword in ["metrics", "status", "occupancy", "utilization", "report", "stats"]):
         metrics_res = get_utilization_metrics(db=db)

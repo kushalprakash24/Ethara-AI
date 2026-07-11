@@ -149,7 +149,8 @@ export default function Dashboard() {
       
       {/* SIDEBAR NAVIGATION */}
       <aside className="w-64 bg-slate-900 text-white flex flex-col p-6 shadow-xl">
-        <div className="text-xl font-black tracking-wider text-indigo-400 mb-8">Base // SEATSYNC</div>
+        <div className="text-xl font-black tracking-wider text-indigo-400 mb-8">Ethara Seat Allocation & Project Mapping System
+</div>
         <nav className="flex-1 space-y-2">
           <button onClick={() => setCurrentView("center")} className={`w-full text-left flex items-center px-4 py-3 rounded-lg font-medium transition ${currentView === "center" ? "bg-slate-800 text-white" : "text-slate-400 hover:bg-slate-800 hover:text-white"}`}>🏢 Command Center</button>
           <button onClick={() => setCurrentView("maps")} className={`w-full text-left flex items-center px-4 py-3 rounded-lg font-medium transition ${currentView === "maps" ? "bg-slate-800 text-white" : "text-slate-400 hover:bg-slate-800 hover:text-white"}`}>🪑 Floor Plan Maps</button>
